@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <style>
+      html {
+        padding: 0px;
+        margin: 0px;
+      }
+      body {
+        padding: 20px;
+        margin: 0px;
+      }
+      .block-wrapper {
+        height: 200px;
+        padding: 10px;
+      }
+      .block {
+        border: 1px black solid;
+        width: 100%;
+        height: 100%;
+      }
+      .title-bar {
+        width: 100%;
+        height: 40px;
+        padding: 10px;
+        background-color: skyblue;
+        border-bottom: 1px black solid;
+        font-weight: bold;
+      }
+      .hight50-block {
+        height: 50%;
+        border: 1px black solid;
+        padding: 0px;
+        text-align: center;
+      }
+      .hight50-value {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 70px;
+        border: 1px black solid;
+        padding: 0px;
+      }
+      h2 {
+        padding: 0px;
+        margin: 0px !important;
+        margin-top: 5px !important;
+        margin-bottom: 0px !important;
+        text-align: center;
+      }
+      .signal {
+        background-color: rgb(241, 238, 238);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px black solid;
+        margin: auto;
+        margin-top: 5px;
+      }
+      .pd-top {
+        margin-top: 15px;
+      }
+      .logo {
+        width: 80%;
+        height: 100%;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Digital Twin Dashboard</h2>
+    <div class="row">
+      <div class="col-md-6 block-wrapper">
+        <div class="block">
+          <div class="title-bar">Spindle Speed</div>
+          <div style="max-height: 140px; width: 100%;">
+            <canvas id="myChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 block-wrapper">
+        <div class="block">
+          <div class="col-md-6 hight50-block">
+            <div class="title-bar">Present Spindle Speed</div>
+            <h2 id="speed">0</h2>
+          </div>
+          <div class="col-md-6 hight50-block">
+            <img src="http://3.7.2.182/udp/logo.jpg" alt="" class="logo" />
+          </div>
+          <div class="col-md-6 hight50-block">
+            <div class="title-bar">Last Spindle Speed</div>
+            <h2 id="oldspeed">0</h2>
+          </div>
+          <div class="col-md-6 hight50-block">
+            <div class="title-bar">Lasted For</div>
+            <h2 id="time">0</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 block-wrapper">
+        <div class="block">
+          <div class="title-bar">Current Data</div>
+          <div class="col-md-6 hight50-value">
+            <h2>Magnitude</h2>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <h2 id="mag">0</h2>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <h2>Peak Freq from FFT</h2>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <h2 id="frq">0</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 block-wrapper">
+        <div class="block">
+          <div class="col-md-6 hight50-block">
+            <div class="title-bar">Low Speed</div>
+            <div class="signal" id="low"></div>
+          </div>
+          <div class="col-md-6 hight50-block">
+            <div class="title-bar">Medium Speed</div>
+            <div class="signal" id="med"></div>
+          </div>
+          <div class="col-md-6 hight50-block">
+            <div class="title-bar">High Speed</div>
+            <div class="signal" id="high"></div>
+          </div>
+          <div class="col-md-6 hight50-block">
+            <div class="title-bar">Very High Speed</div>
+            <div class="signal" id="vhigh"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 block-wrapper">
+        <div class="block">
+          <div class="title-bar">Machine Condition</div>
+          <div class="col-md-6 hight50-value">
+            <h2>Critical</h2>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <div class="signal pd-top" id="critical"></div>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <h2>Not-Critical</h2>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <div class="signal pd-top" id="not-critical"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 block-wrapper">
+        <div class="block">
+          <div class="title-bar">Cutting Status</div>
+          <div class="col-md-6 hight50-value">
+            <h2>Cutting</h2>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <div class="signal pd-top" id="cutting"></div>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <h2>Not Cutting</h2>
+          </div>
+          <div class="col-md-6 hight50-value">
+            <div class="signal pd-top" id="not-cutting"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      var totalSeconds = 0;
+      var oldspeed = 0;
+      var pastspeed = 0;
+      var speed = 0;
+      $("#oldspeed").html(oldspeed);
+      socket.on("message", (data) => {
+        let array = data.split(" ");
+        speed = parseInt(array[2]);
+        $("#mag").html(array[0] + " Amp");
+        $("#frq").html(parseFloat(array[1]).toFixed(2) + " Hz");
+        $("#speed").html(speed + " RPM");
+        $(".signal").css("background-color", " rgb(241, 238, 238)");
+        if (speed <= 100) {
+          $("#low").css("background-color", "green");
+        } else if (speed <= 200) {
+          $("#med").css("background-color", "green");
+        } else if (speed <= 300) {
+          $("#high").css("background-color", "green");
+        } else if (speed > 300) {
+          $("#vhigh").css("background-color", "red");
+          $("#critical").css("background-color", "red");
+        }
+        if (speed <= 300) {
+          $("#not-critical").css("background-color", "green");
+        }
+        if (array[3] == 1) {
+          $("#cutting").css("background-color", "green");
+        } else {
+          $("#not-cutting").css("background-color", "red");
+        }
+        if (speed != pastspeed && oldspeed != pastspeed) {
+          oldspeed = pastspeed;
+          $("#oldspeed").html(oldspeed + " RPM");
+          min = parseInt(totalSeconds / 60);
+          sec = totalSeconds % 60;
+          if (sec < 10) {
+            sec = "0" + sec;
+          }
+          $("#time").html(min + ":" + sec + " Min");
+          totalSeconds = 0;
+        }
+        if (speed != pastspeed) {
+          pastspeed = speed;
+        }
+      });
+
+      setInterval(setTime, 1000);
+      function setTime() {
+        ++totalSeconds;
+      }
+      var ctx = document.getElementById("myChart").getContext("2d");
+      var chart = new Chart(ctx, {
+        // The type of chart we want to create
+        type: "line",
+
+        // The data for our dataset
+        data: {
+          labels: ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"],
+          datasets: [
+            {
+              label: "speed",
+              borderColor: "rgb(255, 99, 132)",
+              data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              steppedLine: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            display: false,
+          },
+          tooltips: {
+            enabled: false,
+          },
+          steppedLine: "before",
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                },
+                scaleLabel: {
+                  display: true,
+                  labelString: "RPM",
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      setInterval(updateGraph, 1000);
+      function updateGraph() {
+        addData(chart, 100, speed);
+        removeData(chart);
+        chart.update();
+      }
+
+      function addData(chart, label, data) {
+        chart.data.labels.push(label);
+        chart.data.datasets[0].data.push(speed);
+      }
+
+      function removeData(chart) {
+        chart.data.labels = ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"];
+        chart.data.datasets[0].data.splice(0, 1);
+      }
+    </script>
+  </body>
+</html>
